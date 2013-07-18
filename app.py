@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 def unpack_json(game_json):
     # JSON: {'game':{'countries':{[countries]
-    board_map = eval(open('board_map.rsk').readline())
+    board = eval(open('board_map.rsk').readline())
     my_data = game_json['you']
     game = game_json['game']
 
@@ -23,10 +23,31 @@ def unpack_json(game_json):
     me.my_countries = my_data['countries']
     me.cards = my_data['cards']
     players = game['players']
+    #for STRATEGIC value
+    for continent in board['continents']:
+        continent.access_points = board[continent]['access points']
+        continent.value = board[continent]['bonus']
+        continent.countries = board[continent]['countries']
     for country_name in game['countries']:
-        board_map.countries[country_name].owner = players[game['countries'][country_name]['owner']]
-        board_map.countries[country_name].troops = game['countries'][country_name]['troops']
-    return me, players, board_map
+        current_country = board.countries[country_name]
+        current_country.owner = players[game['countries'][country_name]['owner']]
+        current_country.troops = game['countries'][country_name]['troops']
+        #for THREAT value
+        current_country.bordering_countries = game['countries'][country_name]['bordering_countries']
+        current_country.bordering_enemies = [players[game['countries'][bordering_country]['owner']] 
+                                            for bordering_country in current_country.bordering_countries 
+                                            if players[game['countries'][bordering_country]['owner']]!=my_name]
+        current_country.bordering_enemy_troops = 0
+        for enemy_country in current_country.bordering_enemies:
+            current_country.bordering_enemy_troops += game['countries'][enemy_country]['troops']
+        current_country.unique_bordering_enemies = list(set(current_country.bordering_enemies))
+        for unique_enemy in current_country.unique_bordering_enemies:
+            unique_enemy.troops_per_turn = 
+            unique_enemy.cards = game["other_players"][unique_enemy].cards
+        
+        
+    return me, players, board
+    
 
 @app.route("/status")
 def status():
