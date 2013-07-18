@@ -1,0 +1,28 @@
+potential_placement_value = 
+
+* Access points to that country
+* Access points to the continent containing that country
+* Point value of that continent
+* How many bordering countries we own
+* ""  ""   ""        ""        enemy owns
+* Percentage of countries in that continent a single enemy owns
+* ""         "" ""        "" ""   ""        we own
+
+
+troop_placement_value = 
+
+~ Give each country a THREAT value.
+    * # of bordering enemy countries [0:x0, else:#x2]
+        * # of troops in those countries [#]
+        * # of unique enemies owning those countries [-#]
+    * potential strategic value of that country to each unique surrounding enemy [our equation]
+        * # of troops that unique enemy gets per turn [#/2]
+        * # of cards that unique enemy has [<3:0, 3:set_troops*(1/2), 4:set_troops*(3/4) 5:set_troops)]
+
+~ Give each country a STRATEGIC_VALUE value.
+    * Access points to that country [10/(#)]
+    * Access points to the continent containing that country [10/(#)]
+    * Point value of that continent [#/2]
+    * How many bordering countries we own [#]
+    * Percentage of countries in that continent a single enemy owns [wash]
+    * ""         "" ""        "" ""   ""        we own [(% we own)*5]
