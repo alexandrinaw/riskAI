@@ -4,6 +4,7 @@ Basic strategy:
 cluster, creating a strong base and expanding slowly
 
 To do:
+
 who to attack
 
 when to attack
