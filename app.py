@@ -23,16 +23,13 @@ def unpack_json(game_json):
     me.my_countries = my_data['countries']
     me.cards = my_data['cards']
     players = game['players']
-    #for STRATEGIC value
     for continent in board['continents']:
-        continent.access_points = board[continent]['access points']
         continent.value = board[continent]['bonus']
         continent.countries = board[continent]['countries']
     for country_name in game['countries']:
         current_country = board.countries[country_name]
         current_country.owner = players[game['countries'][country_name]['owner']]
         current_country.troops = game['countries'][country_name]['troops']
-        #for THREAT value
         current_country.bordering_countries = game['countries'][country_name]['bordering_countries']
         current_country.bordering_enemies = [players[game['countries'][bordering_country]['owner']] 
                                             for bordering_country in current_country.bordering_countries 
@@ -42,10 +39,20 @@ def unpack_json(game_json):
             current_country.bordering_enemy_troops += game['countries'][enemy_country]['troops']
         current_country.unique_bordering_enemies = list(set(current_country.bordering_enemies))
         for unique_enemy in current_country.unique_bordering_enemies:
-            unique_enemy.troops_per_turn = 
+            unique_enemy.troops_per_turn = 0 #needs to be calculated
             unique_enemy.cards = game["other_players"][unique_enemy].cards
-        
-        
+        current_country.strategic_value = (10/len(current_country.bordering_countries) +
+                                          10/len(board[current_country]['continent']['access points']) +
+                                          board[current_country]['continent']['bonus']/2 +
+                                          len(current_country.bordering_countries)-len(current_country.bordering_enemies) +
+                                          (len(current_country.bordering_countries)-len(current_country.bordering_enemies))*5/len(board[current_country]['continent']['countries']))
+        current_country.threat_value = (len(current_country.bordering_enemies)*2 +
+                                        current_country.bordering_enemy_troops -
+                                        current_country.unique_bordering_enemies 
+                                        # + strategic value for enemies +
+                                        # troops enemies get each turn +
+                                        # cards enemies have
+                                        )    
     return me, players, board
     
 
