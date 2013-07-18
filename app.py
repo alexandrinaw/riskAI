@@ -8,24 +8,25 @@ pass_prob = float(sys.argv[2])
 
 app = Flask(__name__)
 
-def unpack_json(r):
-    board = import_board_data('./risk/board_graph.json')
-    me_data = r['you']
-    game = r['game']
-    me = Player(me_data['name'])
-    me.earned_cards_this_turn = me_data['earned_cards_this_turn']
-    me.is_eliminated = me_data['is_eliminated']
-    me.troops_to_deploy = me_data['troops_to_deploy']
-    me.available_actions = me_data['available_actions']
-    me.countries = [board.countries[c] for c in me_data['countries']]
-    me.cards = [board.cards[c['country_name']] for c in me_data['cards']]
-    players = {n:Player(n) for n in game['players'] if n != me.name}
-    players[me.name] = me
-    players['none'] = None
+def unpack_json(game_json):
+    # JSON: {'game':{'countries':{[countries]
+    board_map = eval(open('board_map.rsk').readline())
+    my_data = game_json['you']
+    game = game_json['game']
+
+    my_name = my_data['name']
+    me = Player(my_name)
+    me.new_cards = my_data['earned_cards_this_turn']
+    me.is_eliminated = my_data['is_eliminated']
+    me.troops_to_deploy = my_data['troops_to_deploy']
+    me.available_actions = my_data['available_actions']
+    me.my_countries = my_data['countries']
+    me.cards = my_data['cards']
+    players = game['players']
     for country_name in game['countries']:
-        board.countries[country_name].owner = players[game['countries'][country_name]['owner']]
-        board.countries[country_name].troops = game['countries'][country_name]['troops']
-    return me, players, board
+        board_map.countries[country_name].owner = players[game['countries'][country_name]['owner']]
+        board_map.countries[country_name].troops = game['countries'][country_name]['troops']
+    return me, players, board_map
 
 @app.route("/status")
 def status():
