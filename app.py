@@ -4,7 +4,10 @@ from risk.models import *
 import json
 import random
 
-pass_prob = float(sys.argv[2])
+if len(sys.argv) > 2:
+    pass_prob = float(sys.argv[2])
+else:
+    pass_prob = 0.1 # Probability of ending attack phase.
 
 app = Flask(__name__)
 
