@@ -29,7 +29,7 @@ def unpack_json(game_json):
     for country_name in game['countries']:
         current_country = board.countries[country_name]
         current_country.owner = (
-             players[game['countries'][country_name]['owner']]
+             players[game['countries'][country_name]['owner']])
         current_country.troops = game['countries'][country_name]['troops']
         current_country.bordering_countries = (
              game['countries'][country_name]['bordering_countries'])
@@ -40,7 +40,7 @@ def unpack_json(game_json):
               my_name))
         current_country.bordering_enemy_troops = 0
         for enemy_country in current_country.bordering_enemies:
-            (current_country.bordering_enemy_troops += 
+            current_country.bordering_enemy_troops += (
                  game['countries'][enemy_country]['troops'])
         current_country.unique_bordering_enemies = list(set(
                                         current_country.bordering_enemies))
@@ -55,7 +55,7 @@ def unpack_json(game_json):
               len(current_country.bordering_enemies) +
               (len(current_country.bordering_countries) - 
                len(current_country.bordering_enemies)) * 5 / 
-              len(board[current_country]['continent']['countries']))
+              len(board[current_country]['continent']['countries'])))
         current_country.threat_value = (
              len(current_country.bordering_enemies) * 2 +
              current_country.bordering_enemy_troops -
