@@ -26,3 +26,14 @@ troop_placement_value =
     * How many bordering countries we own [#]
     * Percentage of countries in that continent a single enemy owns [wash]
     * ""         "" ""        "" ""   ""        we own [(% we own)*5]
+    
+   
+   
+should_attack = 
+
+* Strategic Value
+* Probablity of winning
+* if we have won a country so far that turn
+* Threat level to country we're attacking from
+
+
