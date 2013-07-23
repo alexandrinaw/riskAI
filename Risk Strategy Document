@@ -29,11 +29,15 @@ troop_placement_value =
     
    
    
+   
 should_attack = 
 
-* Strategic Value
+* Strategic value of country to attack
 * Probablity of winning
-* if we have won a country so far that turn
-* Threat level to country we're attacking from
+   *our troops vs their troops
+* if we have won a country so far that turn (want one win per turn for card)
+* Threat level to country we're attacking from (how many troops we need to leave there)
+* Threat level to the country we're attacking if we won (can we defend it?)
+
 
 
