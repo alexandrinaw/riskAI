@@ -26,43 +26,49 @@ def unpack_json(game_json):
     me.my_countries = my_data['countries']
     me.cards = my_data['cards']
     players = game['players']
-    for continent in board['continents']:
-        continent.value = board[continent]['bonus']
-        continent.countries = board[continent]['countries']
+    #for continent in board['continents']:
+        #continent.value = board['continents'][continent]['bonus']
+        #continent.countries = board['continents'][continent]['countries']
     for country_name in game['countries']:
-        current_country = board.countries[country_name]
-        current_country.owner = (
-             players[game['countries'][country_name]['owner']])
-        current_country.troops = game['countries'][country_name]['troops']
-        current_country.bordering_countries = (
-             game['countries'][country_name]['bordering_countries'])
-        current_country.bordering_enemies = (
-             players[game['countries'][bordering_country]['owner']] for 
-             bordering_country in current_country.bordering_countries if 
-             (players[game['countries'][bordering_country]['owner']] != 
-              my_name))
-        current_country.bordering_enemy_troops = 0
-        for enemy_country in current_country.bordering_enemies:
-            current_country.bordering_enemy_troops += (
+        board['countries'][country_name]['owner'] = (
+             game['countries'][country_name]['owner'])
+        board['countries'][country_name]['troops'] = (
+                            game['countries'][country_name]['troops'])
+        board['countries'][country_name]['bordering_enemies'] = (
+             game['countries'][bordering_country]['owner'] for 
+             bordering_country in (
+                board['countries'][country_name]['bordering_countries']) if 
+             (game['countries'][bordering_country]['owner'] != my_name))
+        board['countries'][country_name]['bordering_enemy_troops'] = 0
+        print list(board['countries'][country_name]['bordering_enemies'])
+        for enemy_country in board['countries'][country_name]['bordering_enemies']:
+            board['countries'][country_name]['bordering_enemy_troops'] += (
                  game['countries'][enemy_country]['troops'])
-        current_country.unique_bordering_enemies = list(set(
-                                        current_country.bordering_enemies))
-        for unique_enemy in current_country.unique_bordering_enemies:
-            unique_enemy.troops_per_turn = 0 #needs to be calculated
-            unique_enemy.cards = game["other_players"][unique_enemy].cards
-        current_country.strategic_value = (
-             10/len(current_country.bordering_countries) +
-             10/len(board[current_country]['continent']['access points']) +
-             board[current_country]['continent']['bonus']/2 +
-             (len(current_country.bordering_countries) - 
-              len(current_country.bordering_enemies) +
-              (len(current_country.bordering_countries) - 
-               len(current_country.bordering_enemies)) * 5 / 
-              len(board[current_country]['continent']['countries'])))
-        current_country.threat_value = (
-             len(current_country.bordering_enemies) * 2 +
-             current_country.bordering_enemy_troops -
-             current_country.unique_bordering_enemies) 
+        board['countries'][country_name]['unique_bordering_enemies'] = list(set(
+                            board['countries'][country_name]['bordering_enemies']))
+        for unique_enemy in (
+             board['countries'][country_name]['unique_bordering_enemies']):
+            board['other_players'][unique_enemy]['troops_per_turn'] = 0
+                                                         #needs to be calculated
+            board['other_players'][unique_enemy]['cards'] = (
+                            game['other_players'][unique_enemy]['cards'])
+        board['countries'][country_name]['strategic_value'] = (
+             10/len(board['countries'][country_name]['bordering_countries']) +
+             (10/len(board[board['countries'][country_name]['continent']]
+                                                            ['access points']) +
+             ((board['continents'][board['countries'][country_name]['continent']]
+                                                                    ['bonus'])/2) +
+             (len(board['countries'][country_name]['bordering_countries']) - 
+              len(board['countries'][country_name]['bordering_enemies']) +
+              (len(board['countries'][country_name]['bordering_countries']) - 
+               len(board['countries'][country_name]['bordering_enemies'])) * 5 / 
+              len(board[board['countries'][country_name]['continent']]['countries'])
+                                                                                  )))
+
+        board['countries'][country_name]['threat_value'] = (
+             len(board['countries'][country_name]['bordering_enemies']) * 2 +
+             board['countries'][country_name]['bordering_enemy_troops'] -
+             board['countries'][country_name]['unique_bordering_enemies']) 
             # + strategic value for enemies +
             # troops enemies get each turn +
             # cards enemies have
