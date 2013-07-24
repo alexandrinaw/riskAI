@@ -107,8 +107,8 @@ def turn():
         troops_to_deploy = me.troops_to_deploy
         deploy_orders = {}
         for _ in range(troops_to_deploy):
-            c = random.choice(me.countries)
-            deploy_orders[c.name] = deploy_orders.setdefault(c.name,0) + 1
+            c = random.choice(me.my_countries)
+            deploy_orders[c] = deploy_orders.setdefault(c,0) + 1
         response = {"action":"deploy_troops", "data":deploy_orders}
         print "deploy orders: %s" % deploy_orders
         return json.dumps(response)
