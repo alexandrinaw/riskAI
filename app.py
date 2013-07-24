@@ -18,6 +18,7 @@ def unpack_json(game_json):
     game = game_json['game']
 
     my_name = my_data['name']
+    print "You are %r" % my_name
     me = Player(my_name)
     me.new_cards = my_data['earned_cards_this_turn']
     me.is_eliminated = my_data['is_eliminated']
@@ -26,6 +27,9 @@ def unpack_json(game_json):
     me.my_countries = my_data['countries']
     me.cards = my_data['cards']
     players = game['players']
+    for player in game['players']:
+        if player != my_name:
+            board['other_players'] = game['players']
     #for continent in board['continents']:
         #continent.value = board['continents'][continent]['bonus']
         #continent.countries = board['continents'][continent]['countries']
@@ -40,7 +44,7 @@ def unpack_json(game_json):
                 board['countries'][country_name]['bordering_countries']) if 
              (game['countries'][bordering_country]['owner'] != my_name))
         board['countries'][country_name]['bordering_enemy_troops'] = 0
-        print list(board['countries'][country_name]['bordering_enemies'])
+        #print list(board['countries'][country_name]['bordering_enemies'])
         #TODO: Need to check to see if it's really an enemy country
         for enemy_country in board['countries'][country_name]['bordering_countries']:
             board['countries'][country_name]['bordering_enemy_troops'] += (
@@ -53,7 +57,7 @@ def unpack_json(game_json):
                 board['other_players'][unique_enemy]['troops_per_turn'] = 0
                                                              #needs to be calculated
                 board['other_players'][unique_enemy]['cards'] = (
-                                game['other_players'][unique_enemy]['cards'])
+                                game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
                  10/len(board['countries'][country_name]['bordering_countries']) +
                  (10/(board['continents'][board['countries'][country_name]['continent']]
@@ -93,10 +97,10 @@ def turn():
     me, players, board = unpack_json(r)
     print me.available_actions
     if "choose_country" in me.available_actions:
-        print board['countries'].values()
-        unoccupied = [c for c in board['countries'].values() if not c['owner']]
+        #print board['countries'].values()
+        unoccupied = [c for c in board['countries'] if board['countries'][c]['owner'] == 'none']
         country_choice = random.choice(unoccupied)
-        response = {"action":"choose_country", "data":country_choice.name}
+        response = {"action":"choose_country", "data":country_choice}
         print "choose: %s" % country_choice
         return json.dumps(response)
     elif "deploy_troops" in me.available_actions:
