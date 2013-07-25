@@ -31,24 +31,31 @@ def unpack_json(game_json):
     for player in game['players']:
         if player != my_name:
             board['other_players'] = game['players']
+
     for country_name in game['countries']:
         board['countries'][country_name]['owner'] = (
              game['countries'][country_name]['owner'])
+
         board['countries'][country_name]['troops'] = (
                             game['countries'][country_name]['troops'])
+
         board['countries'][country_name]['bordering_enemies'] = list(
              game['countries'][bordering_country]['owner'] for 
              bordering_country in (
                 board['countries'][country_name]['bordering_countries']) if 
              (game['countries'][bordering_country]['owner'] != my_name))
+
         board['countries'][country_name]['bordering_enemy_troops'] = 0
         #TODO: Need to check to see if it's really an enemy country
+
         for enemy_country in board['countries'][country_name][
                                                 'bordering_countries']:
             board['countries'][country_name]['bordering_enemy_troops'] += (
                  game['countries'][enemy_country]['troops'])
+
         board['countries'][country_name]['unique_bordering_enemies'] = list(set(
                         board['countries'][country_name]['bordering_enemies']))
+
         for unique_enemy in (
              board['countries'][country_name]['unique_bordering_enemies']):
             if unique_enemy != "none":
@@ -57,28 +64,36 @@ def unpack_json(game_json):
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
-              10/len(board['countries'][country_name]['bordering_countries']) +
-              (10/(board['continents'][
-                board['countries'][country_name]['continent']][
-                 'access points']) +
-              ((board['continents'][board['countries'][country_name][
-                                                'continent']]['bonus'])/2) +
-               (len(board['countries'][country_name]['bordering_countries']) - 
-                len(board['countries'][country_name]['bordering_enemies']) +
-                (len(board['countries'][country_name]['bordering_countries']) - 
-                len(board['countries'][country_name]['bordering_enemies']))*5/ 
-                len(board['continents'][board['countries'][country_name][
-                                              'continent']]['countries']))))
+             set_strategic_value(board, country_name))
 
         board['countries'][country_name]['threat_value'] = (
-             len(board['countries'][country_name]['bordering_enemies']) * 2 +
-             board['countries'][country_name]['bordering_enemy_troops'] -
-             len(board['countries'][country_name]['unique_bordering_enemies'])) 
-            # + strategic value for enemies +
-            # troops enemies get each turn +
-            # cards enemies have
+            set_threat_value(board, country_name))
+
     return me, players, board
     
+def set_threat_value(board, country_name):
+    return (len(board['countries'][country_name]['bordering_enemies']) * 2 +
+     board['countries'][country_name]['bordering_enemy_troops'] -
+     len(board['countries'][country_name]['unique_bordering_enemies'])) 
+    # + strategic value for enemies +
+    # troops enemies get each turn +
+    # cards enemies have
+
+def set_strategic_value(board, country_name):
+    num_bordering_countries = len(
+        board['countries'][country_name]['bordering_countries'])
+    num_bordering_enemies = len(
+        board['countries'][country_name]['bordering_enemies'])
+    return (10/num_bordering_countries +
+      (10/(board['continents'][board['countries'][country_name]['continent']][
+       'access points']) + (
+        (board['continents'][board['countries'][country_name][
+          'continent']]['bonus'])/2) +
+       (num_bordering_countries - num_bordering_enemies +
+        (num_bordering_countries - num_bordering_enemies) * 5 / 
+        len(board['continents'][board['countries'][country_name][
+                                      'continent']]['countries']))))
+
 def choose_country(board):
     unoccupied = [c for c in board['countries'] if (
                             board['countries'][c]['owner'] == 'none')]
