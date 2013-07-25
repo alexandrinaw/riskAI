@@ -102,7 +102,12 @@ def choose_country(board):
     return {"action":"choose_country", "data":country_choice}
 
 def deploy_initial_troops(board, me):
-    deploy_orders = {random.choice(me.my_countries): 1}
+    compared_value = 0
+    for c in me.my_countries:
+        if board['countries'][c]['strategic_value'] >= compared_value:
+            chosen_country = c
+            compared_value = board['countries'][c]['strategic_value']
+    deploy_orders = {chosen_country: 1}
     print "initial deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
 
