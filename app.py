@@ -89,10 +89,13 @@ def enemy_troops_per_turn(board, enemy):
         
     
 def set_threat_value(board, country_name):
-    enemy_troops_per_turn=sum([board['other_players'][enemy]['troops_per_turn'] for enemy in 
-                    board['countries'][country_name]['unique_bordering_enemies'] if enemy!='none'])
+    enemy_troops_per_turn=sum(
+        [board['other_players'][enemy]['troops_per_turn'] for enemy in 
+         board['countries'][country_name]['unique_bordering_enemies'] 
+                                                    if enemy != 'none'])
     enemy_cards=sum([board['other_players'][enemy]['cards'] for enemy in 
-                     board['countries'][country_name]['unique_bordering_enemies'] if enemy!='none'])
+                     board['countries'][country_name][
+                     'unique_bordering_enemies'] if enemy!='none'])
     return (len(board['countries'][country_name]['bordering_enemies']) * 2 +
      board['countries'][country_name]['bordering_enemy_troops'] -
      len(board['countries'][country_name]['unique_bordering_enemies']) +
@@ -149,14 +152,15 @@ def deploy_troops(board, me):
             troops = board['countries'][c]['troops']
             if troops >= threat + strategic_value:
                 continue
+            if threat == 0:
+                continue
             modified_value = threat + strategic_value - troops
             if modified_value >= compared_value:
                 chosen_country = c
                 compared_value = modified_value
         if compared_value == 0:
             chosen_country = max([c for c in me.my_countries], key=(
-                board['countries'][c]['threat_value'] + 
-                board['countries'][c]['strategic_value']))
+                board['countries'][c]['threat_value']))
         if chosen_country not in deploy_orders:
             deploy_orders[chosen_country] = 0
         deploy_orders[chosen_country] += 1
