@@ -151,12 +151,12 @@ def attack(board):
         return {'action':'attack', 'data':data}
 
 def reinforce(board, me):
-    to_reinforce = for c1 in me.countries
-                    if c1[threat_value] > to_reinforce[threat_value]
-                        to_reinforce = c1
-    reinforce_from = for c2 in to_reinforce.border_countries
-                    if c2.troops > reinforce_from
-                        reinforce_from = c2
+    for c1 in me.countries:
+        if c1[threat_value] > to_reinforce[threat_value]:
+            to_reinforce = c1
+    for c2 in to_reinforce.border_countries:
+        if c2.troops > reinforce_from:
+            reinforce_from = c2
     reinforce_countries = (to_reinforce, reinforce_from)
     
     if not reinforce_countries:
