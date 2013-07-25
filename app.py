@@ -63,7 +63,8 @@ def unpack_json(game_json):
                     enemy_troops_per_turn(board, unique_enemy))
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
-            board['countries'][country_name]['strategic_value'] = (
+
+        board['countries'][country_name]['strategic_value'] = (
                 set_strategic_value(board, country_name))
 
         board['countries'][country_name]['threat_value'] = (
