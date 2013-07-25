@@ -30,9 +30,6 @@ def unpack_json(game_json):
     for player in game['players']:
         if player != my_name:
             board['other_players'] = game['players']
-    #for continent in board['continents']:
-        #continent.value = board['continents'][continent]['bonus']
-        #continent.countries = board['continents'][continent]['countries']
     for country_name in game['countries']:
         board['countries'][country_name]['owner'] = (
              game['countries'][country_name]['owner'])
@@ -44,32 +41,33 @@ def unpack_json(game_json):
                 board['countries'][country_name]['bordering_countries']) if 
              (game['countries'][bordering_country]['owner'] != my_name))
         board['countries'][country_name]['bordering_enemy_troops'] = 0
-        #print list(board['countries'][country_name]['bordering_enemies'])
         #TODO: Need to check to see if it's really an enemy country
-        for enemy_country in board['countries'][country_name]['bordering_countries']:
+        for enemy_country in board['countries'][country_name][
+                                                'bordering_countries']:
             board['countries'][country_name]['bordering_enemy_troops'] += (
                  game['countries'][enemy_country]['troops'])
         board['countries'][country_name]['unique_bordering_enemies'] = list(set(
-                            board['countries'][country_name]['bordering_enemies']))
+                        board['countries'][country_name]['bordering_enemies']))
         for unique_enemy in (
              board['countries'][country_name]['unique_bordering_enemies']):
             if unique_enemy != "none":
                 board['other_players'][unique_enemy]['troops_per_turn'] = 0
-                                                             #needs to be calculated
+                                                        #needs to be calculated
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
-                 10/len(board['countries'][country_name]['bordering_countries']) +
-                 (10/(board['continents'][board['countries'][country_name]['continent']]
-                                                                ['access points']) +
-                 ((board['continents'][board['countries'][country_name]['continent']]
-                                                                        ['bonus'])/2) +
-                 (len(board['countries'][country_name]['bordering_countries']) - 
-                  len(board['countries'][country_name]['bordering_enemies']) +
-                  (len(board['countries'][country_name]['bordering_countries']) - 
-                   len(board['countries'][country_name]['bordering_enemies'])) * 5 / 
-                  len(board['continents'][board['countries'][country_name]['continent']]['countries'])
-                                                                                      )))
+              10/len(board['countries'][country_name]['bordering_countries']) +
+              (10/(board['continents'][
+                board['countries'][country_name]['continent']][
+                 'access points']) +
+              ((board['continents'][board['countries'][country_name][
+                                                'continent']]['bonus'])/2) +
+               (len(board['countries'][country_name]['bordering_countries']) - 
+                len(board['countries'][country_name]['bordering_enemies']) +
+                (len(board['countries'][country_name]['bordering_countries']) - 
+                len(board['countries'][country_name]['bordering_enemies']))*5/ 
+                len(board['continents'][board['countries'][country_name][
+                                              'continent']]['countries']))))
 
         board['countries'][country_name]['threat_value'] = (
              len(board['countries'][country_name]['bordering_enemies']) * 2 +
@@ -80,6 +78,21 @@ def unpack_json(game_json):
             # cards enemies have
     return me, players, board
     
+def choose_country(board):
+    unoccupied = [c for c in board['countries'] if (
+                            board['countries'][c]['owner'] == 'none')]
+    country_choice = random.choice(unoccupied)
+    print "choose: %s" % country_choice
+    return {"action":"choose_country", "data":country_choice}
+
+def deploy_troops(board, me):
+    troops_to_deploy = me.troops_to_deploy
+    deploy_orders = {}
+    for _ in range(troops_to_deploy):
+        c = random.choice(me.my_countries)
+        deploy_orders[c] = deploy_orders.setdefault(c,0) + 1
+    print "deploy orders: %s" % deploy_orders
+    return {"action":"deploy_troops", "data":deploy_orders}
 
 @app.route("/status")
 def status():
@@ -97,20 +110,10 @@ def turn():
     me, players, board = unpack_json(r)
     print me.available_actions
     if "choose_country" in me.available_actions:
-        #print board['countries'].values()
-        unoccupied = [c for c in board['countries'] if board['countries'][c]['owner'] == 'none']
-        country_choice = random.choice(unoccupied)
-        response = {"action":"choose_country", "data":country_choice}
-        print "choose: %s" % country_choice
+        response = choose_country(board)
         return json.dumps(response)
     elif "deploy_troops" in me.available_actions:
-        troops_to_deploy = me.troops_to_deploy
-        deploy_orders = {}
-        for _ in range(troops_to_deploy):
-            c = random.choice(me.my_countries)
-            deploy_orders[c] = deploy_orders.setdefault(c,0) + 1
-        response = {"action":"deploy_troops", "data":deploy_orders}
-        print "deploy orders: %s" % deploy_orders
+        response = deploy_troops(board, me)
         return json.dumps(response)
     elif "attack" in me.available_actions:
         possible_attacks = [(c1,c2)
