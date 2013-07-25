@@ -158,7 +158,6 @@ def deploy_troops(board, me):
         deploy_orders[chosen_country] += 1
         board['countries'][chosen_country]['troops'] += 1
         troops_to_deploy -= 1
-
     print "deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
 
