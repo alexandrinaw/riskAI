@@ -3,6 +3,7 @@ from flask import Flask, request
 from risk.models import *
 import json
 import random
+import math
 
 if len(sys.argv) > 2:
     pass_prob = float(sys.argv[2])
@@ -47,9 +48,10 @@ def unpack_json(game_json):
 
         board['countries'][country_name]['bordering_enemy_troops'] = 0
         for enemy_country in board['countries'][country_name][
-                                                'bordering_enemies']:
-            board['countries'][country_name]['bordering_enemy_troops'] += (
-                 game['countries'][enemy_country]['troops'])
+                'bordering_countries']:
+            if board['countries'][enemy_country]['owner'] != my_name:
+                board['countries'][country_name]['bordering_enemy_troops'] += (
+                     game['countries'][enemy_country]['troops'])
 
         board['countries'][country_name]['unique_bordering_enemies'] = list(set(
                         board['countries'][country_name]['bordering_enemies']))
@@ -58,7 +60,7 @@ def unpack_json(game_json):
              board['countries'][country_name]['unique_bordering_enemies']):
             if unique_enemy != "none":
                 board['other_players'][unique_enemy]['troops_per_turn'] = (
-                    enemy_troops_per_turn(unique_enemy))
+                    enemy_troops_per_turn(board, unique_enemy))
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
@@ -69,19 +71,19 @@ def unpack_json(game_json):
 
     return me, players, board
 
-def enemy_troops_per_turn(enemy):
+def enemy_troops_per_turn(board, enemy):
     countries_owned = 0
     continent_bonus = 0
     for continent in board['continents']:
         continent_owned=True
-        for country in board['continents'][country]:
-            if board[continent][country]['owner']==enemy:
+        for country in board['continents'][continent]['countries']:
+            if (board['countries'][country]['owner'] == enemy):
                 countries_owned+=1
             else:
                 continent_owned=False
         if continent_owned:
             continent_bonus+=1
-    return max(ceiling([countries_owned / 3), 3) + continent_bonus
+    return max(math.ceil(countries_owned / 3), 3) + continent_bonus
         
     
 def set_threat_value(board, country_name):
