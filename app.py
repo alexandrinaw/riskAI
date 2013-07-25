@@ -169,29 +169,38 @@ def attack(board, possible_attacks):
         return {'action':'attack', 'data':data}
 
 def reinforce(board, me):
-    for c1 in me.countries:
-        if c1[threat_value] > to_reinforce[threat_value]:
+    threat_value = 0
+    troops = 1 
+    to_reinforce = None
+    reinforce_from = None
+    for c1 in me.my_countries:
+        if board['countries'][c1]['threat_value'] > threat_value:
             to_reinforce = c1
-    for c2 in to_reinforce.border_countries:
-        if c2.troops > reinforce_from:
-            reinforce_from = c2
-    reinforce_countries = (to_reinforce, reinforce_from)
+            threat_value = board['countries'][c1]['threat_value']
+    if to_reinforce is not None:
+        for c2 in board['countries'][to_reinforce]['bordering_countries']:
+            if c2 in me.my_countries:
+                if board['countries'][c2]['troops'] > troops:
+                    reinforce_from = c2
     
-    if not reinforce_countries:
+        if reinforce_from is not None: 
+            moving_troops = board['countries'][reinforce_from]['troops']-1
+            print "reinforced %s from %s with %s troops" % (
+                to_reinforce, reinforce_from, moving_troops)
+            response = {'action':'reinforce', 'data':{
+            'origin_country': reinforce_from, 
+            'destination_country':to_reinforce,
+            'moving_troops':moving_troops}}
+            print response
+            return response
+
+        else:
+            print "ended turn"
+            response = {"action":"end_turn"}
+    
+    else:
         print "ended turn"
         response = {"action":"end_turn"}
-    else:
-        (origin_country,destination_country) = reinforce_countries ()
-        moving_troops = origin_country.troops-1
-
-        print "reinforced %s from %s with %s troops" % (
-            origin_country.name, destination_country.name, moving_troops)
-        response = {'action':'reinforce', 'data':{
-        'origin_country':origin_country.name, 
-        'destination_country':destination_country.name, 
-        'moving_troops':moving_troops}}
-        return response
-
 
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
