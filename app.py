@@ -80,19 +80,12 @@ def set_threat_value(board, country_name):
     # cards enemies have
 
 def set_strategic_value(board, country_name):
-    num_bordering_countries = len(
-        board['countries'][country_name]['bordering_countries'])
-    num_bordering_enemies = len(
-        board['countries'][country_name]['bordering_enemies'])
-    return (10/num_bordering_countries +
-      (10/(board['continents'][board['countries'][country_name]['continent']][
-       'access points']) + (
-        (board['continents'][board['countries'][country_name][
-          'continent']]['bonus'])/2) +
-       (num_bordering_countries - num_bordering_enemies +
-        (num_bordering_countries - num_bordering_enemies) * 5 / 
-        len(board['continents'][board['countries'][country_name][
-                                      'continent']]['countries']))))
+    num_bordering_countries = len( board['countries'][country_name]['bordering_countries'])
+    num_bordering_enemies = len( board['countries'][country_name]['bordering_enemies'])
+    access_points = board['continents'][board['countries'][country_name]['continent']]['access points']
+    bonus = board['continents'][board['countries'][country_name]['continent']]['bonus']
+    countries_in_continent = len(board['continents'][board['countries'][country_name][ 'continent']]['countries'])
+    return (10/num_bordering_countries +(10/(access_points) + ((bonus)/2) + (num_bordering_countries - num_bordering_enemies + (num_bordering_countries - num_bordering_enemies) * 5 / countries_in_continent)))
 
 def choose_country(board):
     unoccupied = [c for c in board['countries'] if (
