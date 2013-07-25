@@ -183,8 +183,19 @@ def attack_determination(board, me):
     return response
 
 def attack(board, possible_attacks):    
+        max_value = 0
         attacking_country, defending_country = (
                                     random.choice(possible_attacks))
+        for attack in possible_attacks:
+            if board['countries'][attack[1]]['strategic_value']>max_value:
+                max_value=board['countries'][attack[1]]['strategic_value']
+                defending_country = attack[1]
+                attacking_country = attack[0]
+        for attack in possible_attacks:
+            if attack[1]==defending_country:
+                print("pair: ",attack)
+                if board['countries'][attack[0]]['troops']>board['countries'][attacking_country]['troops']:
+                    attacking_country=attack[0]
         attacking_troops = min(3, board['countries'][attacking_country][
             'troops'] - 1)
         moving_troops = random.randint(0,max(0, board['countries'][
