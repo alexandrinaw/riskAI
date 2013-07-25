@@ -4,6 +4,7 @@ from risk.models import *
 import json
 import random
 import math
+import itertools
 
 if len(sys.argv) > 2:
     pass_prob = float(sys.argv[2])
@@ -124,19 +125,41 @@ def choose_country(board):
 def deploy_initial_troops(board, me):
     compared_value = 0
     for c in me.my_countries:
-        if board['countries'][c]['strategic_value'] >= compared_value:
+        modified_value = (board['countries'][c]['strategic_value'] - 
+                          board['countries'][c]['troops'])
+        if modified_value >= compared_value:
             chosen_country = c
-            compared_value = board['countries'][c]['strategic_value']
+            compared_value = modified_value
     deploy_orders = {chosen_country: 1}
     print "initial deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
 
 def deploy_troops(board, me):
-    troops_to_deploy = me.troops_to_deploy
     deploy_orders = {}
-    for _ in range(troops_to_deploy):
-        c = random.choice(me.my_countries)
-        deploy_orders[c] = deploy_orders.setdefault(c,0) + 1
+    troops_to_deploy = me.troops_to_deploy
+    while troops_to_deploy > 0:
+        compared_value = 0
+        for c in me.my_countries:
+            threat = board['countries'][c]['threat_value']
+            strategic_value = board['countries'][c]['strategic_value']
+            troops = board['countries'][c]['troops']
+            if troops >= threat + strategic_value:
+                continue
+            modified_value = threat + strategic_value - troops
+            if modified_value >= compared_value:
+                chosen_country = c
+                compared_value = modified_value
+        if compared_value == 0:
+            chosen_country = max([c for c in me.my_countries], key=(
+                board['countries'][c]['threat_value'] + 
+                board['countries'][c]['strategic_value'] - 
+                board['countries'][c]['troops']))
+        if chosen_country not in deploy_orders:
+            deploy_orders[chosen_country] = 0
+        deploy_orders[chosen_country] += 1
+        board['countries'][chosen_country]['troops'] += 1
+        troops_to_deploy -= 1
+
     print "deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
 
@@ -204,7 +227,7 @@ def reinforce(board, me):
     return response
 
 def spend_cards(board, me):
-    combos = itertools.combinations(me.cards,3)
+    combos = itertools.combinations(me.cards, 3)
     potential_sets = [c for c in combos if c[0].is_set_with(c[1],c[2])]
     trade_in = random.choice(potential_sets)
     trade_in = [c.country_name for c in trade_in]
