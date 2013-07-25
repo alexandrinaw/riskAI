@@ -203,11 +203,15 @@ def reinforce(board, me):
 
     return response
 
+def is_card_set(card_one, card_two, card_three):
+    wild_cards = [card for card in [card_one, card_two, card_three] if (card['value'] == 'wild')]
+    return (len(wild_cards) >= 1) or (card_one['value'] == card_two['value'] == card_three['value']) or (card_one['value'] != card_two['value'] != card_three['value'])
+    
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
-    potential_sets = [c for c in combos if c[0].is_set_with(c[1],c[2])]
+    potential_sets = [c for c in combos if is_card_set(c[0], c[1],c[2])]
     trade_in = random.choice(potential_sets)
-    trade_in = [c.country_name for c in trade_in]
+    trade_in = [c['country_name'] for c in trade_in]
     response = {'action':'spend_cards', 'data':trade_in}
     print "traded in cards %s" % trade_in
     return response
