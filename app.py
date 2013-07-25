@@ -96,9 +96,11 @@ def set_threat_value(board, country_name):
     enemy_cards=sum([board['other_players'][enemy]['cards'] for enemy in 
                      board['countries'][country_name][
                      'unique_bordering_enemies'] if enemy!='none'])
-    return (len(board['countries'][country_name]['bordering_enemies']) * 2 +
-     board['countries'][country_name]['bordering_enemy_troops'] -
-     len(board['countries'][country_name]['unique_bordering_enemies']) +
+    bordering_enemies = len(board['countries'][country_name]['bordering_enemies']) 
+    bordering_enemy_troops = board['countries'][country_name]['bordering_enemy_troops'] 
+    unique_bordering_enemies = len(board['countries'][country_name]['unique_bordering_enemies']) 
+    
+    return (bordering_enemies* 2 + bordering_enemy_troops - unique_bordering_enemies +
     # + strategic value for enemies +
      enemy_troops_per_turn + enemy_cards)
 
