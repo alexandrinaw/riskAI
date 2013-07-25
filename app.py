@@ -53,7 +53,7 @@ def unpack_json(game_json):
             if board['countries'][enemy_country]['owner'] != my_name:
                 board['countries'][country_name]['bordering_enemy_troops'] += (
                      game['countries'][enemy_country]['troops'])
-
+                     
         board['countries'][country_name]['unique_bordering_enemies'] = list(set(
                         board['countries'][country_name]['bordering_enemies']))
 
@@ -89,12 +89,16 @@ def enemy_troops_per_turn(board, enemy):
         
     
 def set_threat_value(board, country_name):
+    enemy_troops_per_turn=sum([board['other_players'][enemy]['troops_per_turn'] for enemy in 
+                    board['countries'][country_name]['unique_bordering_enemies'] if enemy!='none'])
+    enemy_cards=sum([board['other_players'][enemy]['cards'] for enemy in 
+                     board['countries'][country_name]['unique_bordering_enemies'] if enemy!='none'])
     return (len(board['countries'][country_name]['bordering_enemies']) * 2 +
      board['countries'][country_name]['bordering_enemy_troops'] -
-     len(board['countries'][country_name]['unique_bordering_enemies'])) 
+     len(board['countries'][country_name]['unique_bordering_enemies']) +
     # + strategic value for enemies +
-    # troops enemies get each turn +
-    # cards enemies have
+     enemy_troops_per_turn + enemy_cards)
+
 
 def set_strategic_value(board, country_name):
     num_bordering_countries = (
