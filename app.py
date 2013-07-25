@@ -27,6 +27,7 @@ def unpack_json(game_json):
     me.my_countries = my_data['countries']
     me.cards = my_data['cards']
     players = game['players']
+    board['turn'] = game['turn']
     for player in game['players']:
         if player != my_name:
             board['other_players'] = game['players']
@@ -85,6 +86,11 @@ def choose_country(board):
     print "choose: %s" % country_choice
     return {"action":"choose_country", "data":country_choice}
 
+def deploy_initial_troops(board, me):
+    deploy_orders = {random.choice(me.my_countries): 1}
+    print "initial deploy orders: %s" % deploy_orders
+    return {"action":"deploy_troops", "data":deploy_orders}
+
 def deploy_troops(board, me):
     troops_to_deploy = me.troops_to_deploy
     deploy_orders = {}
@@ -116,10 +122,9 @@ def attack(board):
                 'defending_country':defending_country.name,
                 'attacking_troops':attacking_troops,
                 'moving_troops':moving_troops}
-        response = {'action':'attack', 'data':data}
         print "attacking %s from %s with %s troops" % (
            defending_country.name, attacking_country.name, attacking_troops)
-        return response
+        return {'action':'attack', 'data':data}
 
 def reinforce(board, me):
     reinforce_countries = [(c1,c2) for c1 in me.countries
@@ -128,19 +133,17 @@ def reinforce(board, me):
                             and c2 in me.countries]
     if not reinforce_countries:
         print "ended turn"
-        response = {"action":"end_turn"}
+        return {"action":"end_turn"}
     else:
         (origin_country,destination_country) = random.choice(
                                                     reinforce_countries)
         moving_troops = random.randint(1,origin_country.troops-1)
         print "reinforced %s from %s with %s troops" % (
                 origin_country.name, destination_country.name, moving_troops)
-        response = {'action':'reinforce', 'data':{
+        return {'action':'reinforce', 'data':{
                      'origin_country':origin_country.name, 
                      'destination_country':destination_country.name, 
                      'moving_troops':moving_troops}}
-    return response
-
 
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
@@ -169,7 +172,10 @@ def turn():
     if "choose_country" in me.available_actions:
         response = choose_country(board)
     elif "deploy_troops" in me.available_actions:
-        response = deploy_troops(board, me)
+        if board['turn'] == 0:
+            response = deploy_initial_troops(board, me)
+        else:
+            response = deploy_troops(board, me)
     elif "attack" in me.available_actions:
         response = attack_determination(board, me)
     elif "reinforce" in me.available_actions:
