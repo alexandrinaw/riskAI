@@ -143,34 +143,32 @@ def deploy_troops(board, me):
 def attack_determination(board, me):
     possible_attacks = [(c1,c2)
                         for c1 in me.my_countries
-                        for c2 in c1.border_countries
-                        if c1.troops > 1 
+                        for c2 in board['countries'][c1]['bordering_countries']
+                        if board['countries'][c1]['troops'] > 1 
                         and c2 not in me.my_countries]
     if not possible_attacks or random.random() < pass_prob:
         response = {"action":"end_attack_phase"}
         print "ended attack phase"
     else:
-        response = attack(board)
+        response = attack(board, possible_attacks)
     return response
 
-def attack(board):    
+def attack(board, possible_attacks):    
         attacking_country, defending_country = (
                                     random.choice(possible_attacks))
-        attacking_troops = min(3, attacking_country.troops-1)
-        moving_troops = random.randint(0,max(0,attacking_country.troops-4))
-        data = {'attacking_country':attacking_country.name,
-                'defending_country':defending_country.name,
+        attacking_troops = min(3, board['countries'][attacking_country][
+            'troops'] - 1)
+        moving_troops = random.randint(0,max(0, board['countries'][
+            attacking_country]['troops'] - 4))
+        data = {'attacking_country':attacking_country,
+                'defending_country':defending_country,
                 'attacking_troops':attacking_troops,
                 'moving_troops':moving_troops}
         print "attacking %s from %s with %s troops" % (
-           defending_country.name, attacking_country.name, attacking_troops)
+           defending_country, attacking_country, attacking_troops)
         return {'action':'attack', 'data':data}
 
 def reinforce(board, me):
-    reinforce_countries = [(c1,c2) for c1 in me.my_countries
-                            for c2 in c1.border_countries
-                            if c1.troops > 1
-                            and c2 in me.my_countries]
     for c1 in me.countries:
         if c1[threat_value] > to_reinforce[threat_value]:
             to_reinforce = c1
