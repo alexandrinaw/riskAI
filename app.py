@@ -151,23 +151,29 @@ def attack(board):
         return {'action':'attack', 'data':data}
 
 def reinforce(board, me):
-    reinforce_countries = [(c1,c2) for c1 in me.countries
-                            for c2 in c1.border_countries
-                            if c1.troops > 1
-                            and c2 in me.countries]
+    to_reinforce = for c1 in me.countries
+                    if c1[threat_value] > to_reinforce[threat_value]
+                        to_reinforce = c1
+    reinforce_from = for c2 in to_reinforce.border_countries
+                    if c2.troops > reinforce_from
+                        reinforce_from = c2
+    reinforce_countries = (to_reinforce, reinforce_from)
+    
     if not reinforce_countries:
         print "ended turn"
-        return {"action":"end_turn"}
+        response = {"action":"end_turn"}
     else:
-        (origin_country,destination_country) = random.choice(
-                                                    reinforce_countries)
-        moving_troops = random.randint(1,origin_country.troops-1)
+        (origin_country,destination_country) = reinforce_countries ()
+        moving_troops = origin_country.troops-1
+
         print "reinforced %s from %s with %s troops" % (
-                origin_country.name, destination_country.name, moving_troops)
-        return {'action':'reinforce', 'data':{
-                     'origin_country':origin_country.name, 
-                     'destination_country':destination_country.name, 
-                     'moving_troops':moving_troops}}
+            origin_country.name, destination_country.name, moving_troops)
+        response = {'action':'reinforce', 'data':{
+        'origin_country':origin_country.name, 
+        'destination_country':destination_country.name, 
+        'moving_troops':moving_troops}}
+        return response
+
 
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
