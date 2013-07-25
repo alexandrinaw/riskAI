@@ -31,23 +31,29 @@ def unpack_json(game_json):
     for player in game['players']:
         if player != my_name:
             board['other_players'] = game['players']
+
     for country_name in game['countries']:
         board['countries'][country_name]['owner'] = (
              game['countries'][country_name]['owner'])
+
         board['countries'][country_name]['troops'] = (
                             game['countries'][country_name]['troops'])
+
         board['countries'][country_name]['bordering_enemies'] = list(
              game['countries'][bordering_country]['owner'] for 
              bordering_country in (
                 board['countries'][country_name]['bordering_countries']) if 
              (game['countries'][bordering_country]['owner'] != my_name))
+
         board['countries'][country_name]['bordering_enemy_troops'] = 0
         for enemy_country in board['countries'][country_name][
                                                 'bordering_enemies']:
             board['countries'][country_name]['bordering_enemy_troops'] += (
                  game['countries'][enemy_country]['troops'])
+
         board['countries'][country_name]['unique_bordering_enemies'] = list(set(
                         board['countries'][country_name]['bordering_enemies']))
+
         for unique_enemy in (
              board['countries'][country_name]['unique_bordering_enemies']):
             if unique_enemy != "none":
@@ -56,26 +62,11 @@ def unpack_json(game_json):
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
-              10/len(board['countries'][country_name]['bordering_countries']) +
-              (10/(board['continents'][
-                board['countries'][country_name]['continent']][
-                 'access points']) +
-              ((board['continents'][board['countries'][country_name][
-                                                'continent']]['bonus'])/2) +
-               (len(board['countries'][country_name]['bordering_countries']) - 
-                len(board['countries'][country_name]['bordering_enemies']) +
-                (len(board['countries'][country_name]['bordering_countries']) - 
-                len(board['countries'][country_name]['bordering_enemies']))*5/ 
-                len(board['continents'][board['countries'][country_name][
-                                              'continent']]['countries']))))
+             set_strategic_value(board, country_name))
 
         board['countries'][country_name]['threat_value'] = (
-             len(board['countries'][country_name]['bordering_enemies']) * 2 +
-             board['countries'][country_name]['bordering_enemy_troops'] -
-             len(board['countries'][country_name]['unique_bordering_enemies'])) 
-            # + strategic value for enemies +
-            # troops enemies get each turn +
-            # cards enemies have
+            set_threat_value(board, country_name))
+
     return me, players, board
 
 def enemy_troops_per_turn(enemy):
@@ -92,6 +83,34 @@ def enemy_troops_per_turn(enemy):
             continent_bonus+=1
     return max(ceiling([countries_owned / 3), 3) + continent_bonus
         
+    
+def set_threat_value(board, country_name):
+    return (len(board['countries'][country_name]['bordering_enemies']) * 2 +
+     board['countries'][country_name]['bordering_enemy_troops'] -
+     len(board['countries'][country_name]['unique_bordering_enemies'])) 
+    # + strategic value for enemies +
+    # troops enemies get each turn +
+    # cards enemies have
+
+def set_strategic_value(board, country_name):
+    num_bordering_countries = (
+        len( board['countries'][country_name]['bordering_countries']))
+    num_bordering_enemies = (
+        len( board['countries'][country_name]['bordering_enemies']))
+    access_points = (
+        board['continents'][board['countries'][country_name]['continent']][
+            'access points'])
+    bonus = board['continents'][board['countries'][country_name]['continent']][
+        'bonus']
+    countries_in_continent = (
+        len(board['continents'][board['countries'][country_name][ 'continent']][
+            'countries']))
+    return (
+        10/num_bordering_countries + (10/(access_points) + ((bonus)/2) + 
+        (num_bordering_countries - num_bordering_enemies + 
+        (num_bordering_countries - num_bordering_enemies) * 5 / 
+        countries_in_continent)))
+
 def choose_country(board):
     unoccupied = [c for c in board['countries'] if (
                             board['countries'][c]['owner'] == 'none')]
@@ -100,7 +119,12 @@ def choose_country(board):
     return {"action":"choose_country", "data":country_choice}
 
 def deploy_initial_troops(board, me):
-    deploy_orders = {random.choice(me.my_countries): 1}
+    compared_value = 0
+    for c in me.my_countries:
+        if board['countries'][c]['strategic_value'] >= compared_value:
+            chosen_country = c
+            compared_value = board['countries'][c]['strategic_value']
+    deploy_orders = {chosen_country: 1}
     print "initial deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
 
@@ -144,19 +168,29 @@ def reinforce(board, me):
                             for c2 in c1.border_countries
                             if c1.troops > 1
                             and c2 in me.my_countries]
+    for c1 in me.countries:
+        if c1[threat_value] > to_reinforce[threat_value]:
+            to_reinforce = c1
+    for c2 in to_reinforce.border_countries:
+        if c2.troops > reinforce_from:
+            reinforce_from = c2
+    reinforce_countries = (to_reinforce, reinforce_from)
+    
     if not reinforce_countries:
         print "ended turn"
-        return {"action":"end_turn"}
+        response = {"action":"end_turn"}
     else:
-        (origin_country,destination_country) = random.choice(
-                                                    reinforce_countries)
-        moving_troops = random.randint(1,origin_country.troops-1)
+        (origin_country,destination_country) = reinforce_countries ()
+        moving_troops = origin_country.troops-1
+
         print "reinforced %s from %s with %s troops" % (
-                origin_country.name, destination_country.name, moving_troops)
-        return {'action':'reinforce', 'data':{
-                     'origin_country':origin_country.name, 
-                     'destination_country':destination_country.name, 
-                     'moving_troops':moving_troops}}
+            origin_country.name, destination_country.name, moving_troops)
+        response = {'action':'reinforce', 'data':{
+        'origin_country':origin_country.name, 
+        'destination_country':destination_country.name, 
+        'moving_troops':moving_troops}}
+        return response
+
 
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
