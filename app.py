@@ -64,7 +64,7 @@ def unpack_json(game_json):
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
-             set_strategic_value(board, country_name))
+                set_strategic_value(board, country_name))
 
         board['countries'][country_name]['threat_value'] = (
             set_threat_value(board, country_name))
@@ -81,16 +81,16 @@ def set_threat_value(board, country_name):
 
 def set_strategic_value(board, country_name):
     num_bordering_countries = (
-        len( board['countries'][country_name]['bordering_countries']))
+        len(board['countries'][country_name]['bordering_countries']))
     num_bordering_enemies = (
-        len( board['countries'][country_name]['bordering_enemies']))
+        len(board['countries'][country_name]['bordering_enemies']))
     access_points = (
         board['continents'][board['countries'][country_name]['continent']][
             'access points'])
-    bonus = board['continents'][board['countries'][country_name]['continent']][
-        'bonus']
+    bonus = (board['continents'][board['countries'][country_name]['continent']][
+        'bonus'])
     countries_in_continent = (
-        len(board['continents'][board['countries'][country_name][ 'continent']][
+        len(board['continents'][board['countries'][country_name]['continent']][
             'countries']))
     return (
         10/num_bordering_countries + (10/(access_points) + ((bonus)/2) + 
