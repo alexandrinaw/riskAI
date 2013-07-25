@@ -94,6 +94,63 @@ def deploy_troops(board, me):
     print "deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
 
+def attack_determination(board, me):
+    possible_attacks = [(c1,c2)
+                        for c1 in me.countries
+                        for c2 in c1.border_countries
+                        if c1.troops > 1 
+                        and c2 not in me.countries]
+    if not possible_attacks or random.random() < pass_prob:
+        response = {"action":"end_attack_phase"}
+        print "ended attack phase"
+    else:
+        response = attack(board)
+    return response
+
+def attack(board):    
+        attacking_country, defending_country = (
+                                    random.choice(possible_attacks))
+        attacking_troops = min(3, attacking_country.troops-1)
+        moving_troops = random.randint(0,max(0,attacking_country.troops-4))
+        data = {'attacking_country':attacking_country.name,
+                'defending_country':defending_country.name,
+                'attacking_troops':attacking_troops,
+                'moving_troops':moving_troops}
+        response = {'action':'attack', 'data':data}
+        print "attacking %s from %s with %s troops" % (
+           defending_country.name, attacking_country.name, attacking_troops)
+        return response
+
+def reinforce(board, me):
+    reinforce_countries = [(c1,c2) for c1 in me.countries
+                            for c2 in c1.border_countries
+                            if c1.troops > 1
+                            and c2 in me.countries]
+    if not reinforce_countries:
+        print "ended turn"
+        response = {"action":"end_turn"}
+    else:
+        (origin_country,destination_country) = random.choice(
+                                                    reinforce_countries)
+        moving_troops = random.randint(1,origin_country.troops-1)
+        print "reinforced %s from %s with %s troops" % (
+                origin_country.name, destination_country.name, moving_troops)
+        response = {'action':'reinforce', 'data':{
+                     'origin_country':origin_country.name, 
+                     'destination_country':destination_country.name, 
+                     'moving_troops':moving_troops}}
+    return response
+
+
+def spend_cards(board, me):
+    combos = itertools.combinations(me.cards,3)
+    potential_sets = [c for c in combos if c[0].is_set_with(c[1],c[2])]
+    trade_in = random.choice(potential_sets)
+    trade_in = [c.country_name for c in trade_in]
+    response = {'action':'spend_cards', 'data':trade_in}
+    print "traded in cards %s" % trade_in
+    return response
+
 @app.route("/status")
 def status():
     print 'got status check'
@@ -111,61 +168,15 @@ def turn():
     print me.available_actions
     if "choose_country" in me.available_actions:
         response = choose_country(board)
-        return json.dumps(response)
     elif "deploy_troops" in me.available_actions:
         response = deploy_troops(board, me)
-        return json.dumps(response)
     elif "attack" in me.available_actions:
-        possible_attacks = [(c1,c2)
-                            for c1 in me.countries
-                            for c2 in c1.border_countries
-                            if c1.troops > 1 
-                            and c2 not in me.countries]
-        if not possible_attacks or random.random() < pass_prob:
-            response = {"action":"end_attack_phase"}
-            print "ended attack phase"
-        else:
-            attacking_country, defending_country = (
-                                        random.choice(possible_attacks))
-            attacking_troops = min(3, attacking_country.troops-1)
-            moving_troops = random.randint(0,max(0,attacking_country.troops-4))
-            data = {'attacking_country':attacking_country.name,
-                    'defending_country':defending_country.name,
-                    'attacking_troops':attacking_troops,
-                    'moving_troops':moving_troops}
-            response = {'action':'attack', 'data':data}
-            print "attacking %s from %s with %s troops" % (
-               defending_country.name, attacking_country.name, attacking_troops)
-        return json.dumps(response)
+        response = attack_determination(board, me)
     elif "reinforce" in me.available_actions:
-        reinforce_countries = [(c1,c2) for c1 in me.countries
-                                for c2 in c1.border_countries
-                                if c1.troops > 1
-                                and c2 in me.countries]
-        if not reinforce_countries:
-            print "ended turn"
-            response = {"action":"end_turn"}
-            return json.dumps(response)
-        (origin_country,destination_country) = random.choice(
-                                                    reinforce_countries)
-        moving_troops = random.randint(1,origin_country.troops-1)
-        print "reinforced %s from %s with %s troops" % (
-                origin_country.name, destination_country.name, moving_troops)
-        response = {'action':'reinforce', 'data':{
-                     'origin_country':origin_country.name, 
-                     'destination_country':destination_country.name, 
-                     'moving_troops':moving_troops}}
-        return json.dumps(response)
+        response = reinforce(board, me)
     elif "spend_cards" in me.available_actions:
-        combos = itertools.combinations(me.cards,3)
-        potential_sets = [c for c in combos if c[0].is_set_with(c[1],c[2])]
-        trade_in = random.choice(potential_sets)
-        trade_in = [c.country_name for c in trade_in]
-        response = {'action':'spend_cards', 'data':trade_in}
-        print "traded in cards %s" % trade_in
-        return json.dumps(response)
-    print "something broke"
-    return ''
+        response = spend_cards(board, me)
+    return json.dumps(response)
 
 if __name__ == '__main__':
     port = int(sys.argv[1])
