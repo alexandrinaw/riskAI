@@ -192,7 +192,6 @@ def reinforce(board, me):
             'destination_country':to_reinforce,
             'moving_troops':moving_troops}}
             print response
-            return response
 
         else:
             print "ended turn"
@@ -201,6 +200,8 @@ def reinforce(board, me):
     else:
         print "ended turn"
         response = {"action":"end_turn"}
+
+    return response
 
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
