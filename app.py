@@ -46,10 +46,8 @@ def unpack_json(game_json):
              (game['countries'][bordering_country]['owner'] != my_name))
 
         board['countries'][country_name]['bordering_enemy_troops'] = 0
-        #TODO: Need to check to see if it's really an enemy country
-
         for enemy_country in board['countries'][country_name][
-                                                'bordering_countries']:
+                                                'bordering_enemies']:
             board['countries'][country_name]['bordering_enemy_troops'] += (
                  game['countries'][enemy_country]['troops'])
 
@@ -70,6 +68,21 @@ def unpack_json(game_json):
             set_threat_value(board, country_name))
 
     return me, players, board
+
+def enemy_troops_per_turn(enemy):
+    countries_owned = 0
+    continent_bonus = 0
+    for continent in board['continents']:
+        continent_owned=True
+        for country in board['continents'][country]:
+            if board[continent][country]['owner']==enemy:
+                countries_owned+=1
+            else:
+                continent_owned=False
+        if continent_owned:
+            continent_bonus+=1
+    return max(ceiling([countries_owned / 3), 3) + continent_bonus
+        
     
 def set_threat_value(board, country_name):
     return (len(board['countries'][country_name]['bordering_enemies']) * 2 +
@@ -126,10 +139,10 @@ def deploy_troops(board, me):
 
 def attack_determination(board, me):
     possible_attacks = [(c1,c2)
-                        for c1 in me.countries
+                        for c1 in me.my_countries
                         for c2 in c1.border_countries
                         if c1.troops > 1 
-                        and c2 not in me.countries]
+                        and c2 not in me.my_countries]
     if not possible_attacks or random.random() < pass_prob:
         response = {"action":"end_attack_phase"}
         print "ended attack phase"
@@ -151,6 +164,10 @@ def attack(board):
         return {'action':'attack', 'data':data}
 
 def reinforce(board, me):
+    reinforce_countries = [(c1,c2) for c1 in me.my_countries
+                            for c2 in c1.border_countries
+                            if c1.troops > 1
+                            and c2 in me.my_countries]
     for c1 in me.countries:
         if c1[threat_value] > to_reinforce[threat_value]:
             to_reinforce = c1
