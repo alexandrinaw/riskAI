@@ -57,8 +57,8 @@ def unpack_json(game_json):
         for unique_enemy in (
              board['countries'][country_name]['unique_bordering_enemies']):
             if unique_enemy != "none":
-                board['other_players'][unique_enemy]['troops_per_turn'] = 0
-                                                        #needs to be calculated
+                board['other_players'][unique_enemy]['troops_per_turn'] = (
+                    enemy_troops_per_turn(unique_enemy))
                 board['other_players'][unique_enemy]['cards'] = (
                                 game['players'][unique_enemy]['cards'])
             board['countries'][country_name]['strategic_value'] = (
@@ -106,10 +106,10 @@ def set_strategic_value(board, country_name):
         len(board['continents'][board['countries'][country_name]['continent']][
             'countries']))
     return (
-        10/num_bordering_countries + (10/(access_points) + ((bonus)/2) + 
-        (num_bordering_countries - num_bordering_enemies + 
-        (num_bordering_countries - num_bordering_enemies) * 5 / 
-        countries_in_continent)))
+        10/num_bordering_countries + 10/access_points + bonus/2 + 
+        (num_bordering_countries - num_bordering_enemies) + 
+        ((num_bordering_countries - num_bordering_enemies) * 5 / 
+        countries_in_continent))
 
 def choose_country(board):
     unoccupied = [c for c in board['countries'] if (
