@@ -96,13 +96,16 @@ def set_threat_value(board, country_name):
     enemy_cards=sum([board['other_players'][enemy]['cards'] for enemy in 
                      board['countries'][country_name][
                      'unique_bordering_enemies'] if enemy!='none'])
-    bordering_enemies = len(board['countries'][country_name]['bordering_enemies']) 
-    bordering_enemy_troops = board['countries'][country_name]['bordering_enemy_troops'] 
-    unique_bordering_enemies = len(board['countries'][country_name]['unique_bordering_enemies']) 
+    bordering_enemies = len(
+        board['countries'][country_name]['bordering_enemies']) 
+    bordering_enemy_troops = board['countries'][country_name][
+        'bordering_enemy_troops'] 
+    unique_bordering_enemies = len(
+        board['countries'][country_name]['unique_bordering_enemies']) 
     
-    return (bordering_enemies* 2 + bordering_enemy_troops - unique_bordering_enemies +
+    return (bordering_enemies* 2 + bordering_enemy_troops - 
+            unique_bordering_enemies + enemy_troops_per_turn + enemy_cards)
     # + strategic value for enemies +
-     enemy_troops_per_turn + enemy_cards)
 
 
 def set_strategic_value(board, country_name, me):
@@ -165,7 +168,7 @@ def deploy_troops(board, me):
                 compared_value = modified_value
         if compared_value == 0:
             chosen_country = max([c for c in me.my_countries], key=(
-                board['countries'][c]['threat_value']))
+                lambda x: board['countries'][c]['threat_value']))
         if chosen_country not in deploy_orders:
             deploy_orders[chosen_country] = 0
         deploy_orders[chosen_country] += 1
@@ -199,7 +202,8 @@ def attack(board, possible_attacks):
         for attack in possible_attacks:
             if attack[1]==defending_country:
                 print("pair: ",attack)
-                if board['countries'][attack[0]]['troops']>board['countries'][attacking_country]['troops']:
+                if (board['countries'][attack[0]]['troops'] > 
+                     board['countries'][attacking_country]['troops']):
                     attacking_country=attack[0]
         attacking_troops = min(3, board['countries'][attacking_country][
             'troops'] - 1)
@@ -249,8 +253,11 @@ def reinforce(board, me):
     return response
 
 def is_card_set(card_one, card_two, card_three):
-    wild_cards = [card for card in [card_one, card_two, card_three] if (card['value'] == 'wild')]
-    return (len(wild_cards) >= 1) or (card_one['value'] == card_two['value'] == card_three['value']) or (card_one['value'] != card_two['value'] != card_three['value'])
+    wild_cards = [card for card in [
+        card_one, card_two, card_three] if (card['value'] == 'wild')]
+    return ((len(wild_cards) >= 1) or 
+        (card_one['value'] == card_two['value'] == card_three['value']) or 
+        (card_one['value'] != card_two['value'] != card_three['value']))
     
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
