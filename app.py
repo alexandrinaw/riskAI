@@ -152,8 +152,7 @@ def deploy_troops(board, me):
         if compared_value == 0:
             chosen_country = max([c for c in me.my_countries], key=(
                 board['countries'][c]['threat_value'] + 
-                board['countries'][c]['strategic_value'] - 
-                board['countries'][c]['troops']))
+                board['countries'][c]['strategic_value']))
         if chosen_country not in deploy_orders:
             deploy_orders[chosen_country] = 0
         deploy_orders[chosen_country] += 1
