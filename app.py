@@ -152,7 +152,8 @@ def deploy_troops(board, me):
             troops = board['countries'][c]['troops']
             if troops >= threat + strategic_value:
                 continue
-            if threat == 0:
+            print board['countries'][c]['bordering_enemies']
+            if not board['countries'][c]['bordering_enemies']:
                 continue
             modified_value = threat + strategic_value - troops
             if modified_value >= compared_value:
