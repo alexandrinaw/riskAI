@@ -159,7 +159,6 @@ def deploy_troops(board, me):
             troops = board['countries'][c]['troops']
             if troops >= threat + strategic_value:
                 continue
-            print board['countries'][c]['bordering_enemies']
             if not board['countries'][c]['bordering_enemies']:
                 continue
             modified_value = threat + strategic_value - troops
@@ -222,30 +221,41 @@ def reinforce(board, me):
     troops = 1 
     to_reinforce = None
     reinforce_from = None
-    for c1 in me.my_countries:
-        if board['countries'][c1]['threat_value'] > threat_value:
-            to_reinforce = c1
-            threat_value = board['countries'][c1]['threat_value']
-    if to_reinforce is not None:
-        for c2 in board['countries'][to_reinforce]['bordering_countries']:
-            if c2 in me.my_countries:
-                if board['countries'][c2]['troops'] > troops:
-                    reinforce_from = c2
-    
-        if reinforce_from is not None: 
-            moving_troops = board['countries'][reinforce_from]['troops']-1
-            print "reinforced %s from %s with %s troops" % (
-                to_reinforce, reinforce_from, moving_troops)
-            response = {'action':'reinforce', 'data':{
-            'origin_country': reinforce_from, 
-            'destination_country':to_reinforce,
-            'moving_troops':moving_troops}}
-            print response
 
-        else:
-            print "ended turn"
-            response = {"action":"end_turn"}
-    
+    for c1 in me.my_countries:
+        if not board['countries'][c1]['bordering_enemies']:
+            if board['countries'][c1]['troops'] > troops:
+                reinforce_from = c1
+                troops = board['countries'][c1]['troops']
+    if reinforce_from is not None:
+        for c2 in board['countries'][reinforce_from]['bordering_countries']:
+            if board['countries'][c2]['threat_value'] > threat_value:
+                to_reinforce = c2
+                threat_value = board['countries'][c2]['threat_value']       
+    else:
+        threat_value = 0
+        troops = 1 
+        for c1 in me.my_countries:
+            if board['countries'][c1]['threat_value'] > threat_value:
+                to_reinforce = c1
+                threat_value = board['countries'][c1]['threat_value']
+        if to_reinforce is not None:
+            for c2 in board['countries'][to_reinforce]['bordering_countries']:
+                if c2 in me.my_countries:
+                    if board['countries'][c2]['troops'] > troops:
+                        reinforce_from = c2
+                        troops = board['countries'][c2]['troops']
+        
+    if reinforce_from is not None: 
+        moving_troops = board['countries'][reinforce_from]['troops']-1
+        print "reinforced %s from %s with %s troops" % (
+            to_reinforce, reinforce_from, moving_troops)
+        response = {'action':'reinforce', 'data':{
+        'origin_country': reinforce_from, 
+        'destination_country':to_reinforce,
+        'moving_troops':moving_troops}}
+        print response
+
     else:
         print "ended turn"
         response = {"action":"end_turn"}
