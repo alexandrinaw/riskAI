@@ -6,11 +6,6 @@ import random
 import math
 import itertools
 
-if len(sys.argv) > 2:
-    pass_prob = float(sys.argv[2])
-else:
-    pass_prob = 0.1 # Probability of ending attack phase.
-
 app = Flask(__name__)
 
 def unpack_json(game_json):
@@ -182,7 +177,7 @@ def attack_determination(board, me):
                         for c2 in board['countries'][c1]['bordering_countries']
                         if board['countries'][c1]['troops'] > 1 
                         and c2 not in me.my_countries]
-    if not possible_attacks or random.random() < pass_prob:
+    if not possible_attacks:
         response = {"action":"end_attack_phase"}
         print "ended attack phase"
     else:
