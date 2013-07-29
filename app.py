@@ -124,21 +124,25 @@ def set_strategic_value(board, country_name, me):
         ((our_countries_in_continent) * 5 / 
         countries_in_continent))
 
-def choose_country(board):
-    unoccupied = [c for c in board['countries'] if (
-                            board['countries'][c]['owner'] == 'none')]
-    country_choice = random.choice(unoccupied)
-    print "choose: %s" % country_choice
-    return {"action":"choose_country", "data":country_choice}
-
-def deploy_initial_troops(board, me):
+def compare_modified_values(board, list_to_compare):
     compared_value = 0
-    for c in me.my_countries:
+    for c in list_to_compare:
         modified_value = (board['countries'][c]['strategic_value'] - 
                           board['countries'][c]['troops'])
         if modified_value >= compared_value:
             chosen_country = c
             compared_value = modified_value
+    return chosen_country
+
+def choose_country(board):
+    unoccupied = [c for c in board['countries'] if (
+                            board['countries'][c]['owner'] == 'none')]
+    chosen_country = compare_modified_values(board, unoccupied)
+    print "choose: %s" % chosen_country
+    return {"action":"choose_country", "data":chosen_country}
+
+def deploy_initial_troops(board, me):
+    chosen_country = compare_modified_values(board, me.my_countries)
     deploy_orders = {chosen_country: 1}
     print "initial deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
