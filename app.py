@@ -158,6 +158,8 @@ def set_strategic_value(board, country_name, me):
 def compare_modified_values(board, list_to_compare):
     compared_value = 0
     for c in list_to_compare:
+        if board['countries'][c]['troops'] == 'none':
+            board['countries'][c]['troops'] = 0
         modified_value = (board['countries'][c]['strategic_value'] - 
                           board['countries'][c]['troops'])
         if modified_value >= compared_value:
