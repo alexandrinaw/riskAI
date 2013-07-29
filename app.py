@@ -199,14 +199,26 @@ def attack(board, possible_attacks):
                 attacking_country = attack[0]
         for attack in possible_attacks:
             if attack[1]==defending_country:
-                print("pair: ",attack)
                 if (board['countries'][attack[0]]['troops'] > 
                      board['countries'][attacking_country]['troops']):
                     attacking_country=attack[0]
         attacking_troops = min(3, board['countries'][attacking_country][
             'troops'] - 1)
-        moving_troops = random.randint(0,max(0, board['countries'][
-            attacking_country]['troops'] - 4))
+        moving_troops = 0
+        troops_available = max(0, board['countries'][attacking_country]['troops'] - 4)
+        while troops_available > 0:
+            compared_value = 0
+            threat = board['countries'][defending_country]['threat_value']
+            strategic_value = board['countries'][defending_country]['strategic_value']
+            if moving_troops >= threat + strategic_value:
+                continue
+            if threat == 0:
+                moving_troops=0
+            modified_value = threat + strategic_value - moving_troops
+            if modified_value >= compared_value:
+                moving_troops+=1
+                compared_value = modified_value
+            troops_available -= 1
         data = {'attacking_country':attacking_country,
                 'defending_country':defending_country,
                 'attacking_troops':attacking_troops,
