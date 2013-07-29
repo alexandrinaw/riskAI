@@ -24,7 +24,7 @@ def unpack_json(game_json):
     me.cards = my_data['cards']
     players = game['players']
     board['turn'] = game['turn']
-    board['cards left'] = game['cards_left']
+    board['cards_left'] = game['cards_left']
     for player in game['players']:
         if player != my_name:
             board['other_players'] = game['players']
@@ -90,7 +90,7 @@ def set_threat_value(board, country_name):
          board['countries'][country_name]['unique_bordering_enemies'] 
                                                     if enemy != 'none'])
     enemy_card_worth = 0
-    sets_exchanged = (44-board['cards left']-sum([board['other_players'][player]
+    sets_exchanged = (44-board['cards_left']-sum([board['other_players'][player]
                     ['cards'] for player in board['other_players']]))/3
     if(sets_exchanged < 6):
         next_set_value = (sets_exchanged-1 + 2) * 2
