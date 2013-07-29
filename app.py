@@ -13,7 +13,6 @@ def unpack_json(game_json):
     board = eval(open('board_map.rsk').readline())
     my_data = game_json['you']
     game = game_json['game']
-
     my_name = my_data['name']
     print "You are %r" % my_name
     me = Player(my_name)
@@ -25,6 +24,7 @@ def unpack_json(game_json):
     me.cards = my_data['cards']
     players = game['players']
     board['turn'] = game['turn']
+    board['cards left'] = game['cards_left']
     for player in game['players']:
         if player != my_name:
             board['other_players'] = game['players']
@@ -40,7 +40,8 @@ def unpack_json(game_json):
              game['countries'][bordering_country]['owner'] for 
              bordering_country in (
                 board['countries'][country_name]['bordering_countries']) if 
-             (game['countries'][bordering_country]['owner'] != my_name))
+             ((game['countries'][bordering_country]['owner'] != my_name) and
+             (game['countries'][bordering_country]['owner'] != 'none')))
 
         board['countries'][country_name]['bordering_enemy_troops'] = 0
         for enemy_country in board['countries'][country_name][
@@ -88,9 +89,21 @@ def set_threat_value(board, country_name):
         [board['other_players'][enemy]['troops_per_turn'] for enemy in 
          board['countries'][country_name]['unique_bordering_enemies'] 
                                                     if enemy != 'none'])
-    enemy_cards=sum([board['other_players'][enemy]['cards'] for enemy in 
-                     board['countries'][country_name][
-                     'unique_bordering_enemies'] if enemy!='none'])
+    enemy_card_worth = 0
+    sets_exchanged = (44-board['cards left']-sum([board['other_players'][player]
+                    ['cards'] for player in board['other_players']]))/3
+    if(sets_exchanged < 6):
+        next_set_value = (sets_exchanged-1 + 2) * 2
+    else:
+        next_set_value = (sets_exchanged - 3) * 5
+    for enemy in board['countries'][country_name]['unique_bordering_enemies']:
+        if board['other_players'][enemy]['cards']!='none':
+            if board['other_players'][enemy]['cards']==3:
+                enemy_card_worth+=next_set_value/2
+            elif board['other_players'][enemy]['cards']==4:
+                enemy_card_worth+=next_set_value*3/4
+            elif board['other_players'][enemy]['cards']==5:
+                enemy_card_worth+=next_set_value
     bordering_enemies = len(
         board['countries'][country_name]['bordering_enemies']) 
     bordering_enemy_troops = board['countries'][country_name][
@@ -98,8 +111,8 @@ def set_threat_value(board, country_name):
     unique_bordering_enemies = len(
         board['countries'][country_name]['unique_bordering_enemies']) 
     
-    return (bordering_enemies* 2 + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn + enemy_cards)
+    return (bordering_enemies*2 + bordering_enemy_troops - 
+            unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth)
     # + strategic value for enemies +
 
 
@@ -208,21 +221,17 @@ def attack(board, possible_attacks):
             'troops'] - 1)
         moving_troops = 0
         troops_available = max(0, board['countries'][attacking_country]['troops'] - 4)
+        threat = board['countries'][defending_country]['threat_value']
+        strategic_value = board['countries'][defending_country]['strategic_value']
         while troops_available > 0:
             compared_value = 0
-            threat = board['countries'][defending_country]['threat_value']
-            strategic_value = board['countries'][defending_country]['strategic_value']
             if moving_troops >= threat + strategic_value:
-                continue
-            if threat == 0:
-                moving_troops=0
+                break
             modified_value = threat + strategic_value - moving_troops
             if modified_value >= compared_value:
                 moving_troops+=1
                 compared_value = modified_value
-            troops_available -= 1
-            print "end of while loop troops: ",troops_available
-        print "end of while loop"
+                troops_available -= 1
         data = {'attacking_country':attacking_country,
                 'defending_country':defending_country,
                 'attacking_troops':attacking_troops,
