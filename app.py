@@ -110,16 +110,10 @@ def set_threat_value(board, country_name, me):
         'bordering_enemy_troops'] 
     unique_bordering_enemies = len(
         board['countries'][country_name]['unique_bordering_enemies']) 
-<<<<<<< HEAD
     
     return (bordering_enemies*2 + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth)
-=======
-    return (bordering_enemies* 2 + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn + enemy_cards
+            unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth
             + (5/(closest_enemy(board, country_name, me) + 1)))
-    
->>>>>>> added distance to nearest enemy country into threat_value (i think)
     # + strategic value for enemies +
 
 def closest_enemy(board, source, me):
