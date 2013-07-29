@@ -181,24 +181,26 @@ def attack_determination(board, me):
                         for c2 in board['countries'][c1]['bordering_countries']
                         if board['countries'][c1]['troops'] > 1 
                         and c2 not in me.my_countries]
-    if not possible_attacks:
+    good_attacks=[]
+    for attack_combo in possible_attacks:
+        if board['countries'][attack_combo[0]]['troops']>=2*board['countries'][attack_combo[1]]['troops']:
+            good_attacks.append(attack_combo)
+    if not possible_attacks or not good_attacks:
         response = {"action":"end_attack_phase"}
         print "ended attack phase"
     else:
-        response = attack(board, possible_attacks)
+        response = attack(board, good_attacks)
     return response
 
 def attack(board, possible_attacks):    
         max_value = 0
-        attacking_country, defending_country = (
-                                    random.choice(possible_attacks))
+        attacking_country, defending_country = (possible_attacks[0])
         for attack in possible_attacks:
             if board['countries'][attack[1]]['strategic_value']>max_value:
                 max_value=board['countries'][attack[1]]['strategic_value']
                 defending_country = attack[1]
                 attacking_country = attack[0]
-        for attack in possible_attacks:
-            if attack[1]==defending_country:
+            elif attack[1]==defending_country:
                 if (board['countries'][attack[0]]['troops'] > 
                      board['countries'][attacking_country]['troops']):
                     attacking_country=attack[0]
@@ -219,6 +221,8 @@ def attack(board, possible_attacks):
                 moving_troops+=1
                 compared_value = modified_value
             troops_available -= 1
+            print "end of while loop troops: ",troops_available
+        print "end of while loop"
         data = {'attacking_country':attacking_country,
                 'defending_country':defending_country,
                 'attacking_troops':attacking_troops,
