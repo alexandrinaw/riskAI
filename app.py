@@ -65,7 +65,7 @@ def unpack_json(game_json):
                 set_strategic_value(board, country_name, me))
 
         board['countries'][country_name]['threat_value'] = (
-            set_threat_value(board, country_name))
+            set_threat_value(board, country_name, me))
 
     return me, players, board
 
@@ -84,7 +84,7 @@ def enemy_troops_per_turn(board, enemy):
     return max(math.ceil(countries_owned / 3), 3) + continent_bonus
         
     
-def set_threat_value(board, country_name):
+def set_threat_value(board, country_name, me):
     enemy_troops_per_turn=sum(
         [board['other_players'][enemy]['troops_per_turn'] for enemy in 
          board['countries'][country_name]['unique_bordering_enemies'] 
@@ -110,11 +110,35 @@ def set_threat_value(board, country_name):
         'bordering_enemy_troops'] 
     unique_bordering_enemies = len(
         board['countries'][country_name]['unique_bordering_enemies']) 
+<<<<<<< HEAD
     
     return (bordering_enemies*2 + bordering_enemy_troops - 
             unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth)
+=======
+    return (bordering_enemies* 2 + bordering_enemy_troops - 
+            unique_bordering_enemies + enemy_troops_per_turn + enemy_cards
+            + (5/(closest_enemy(board, country_name, me) + 1)))
+    
+>>>>>>> added distance to nearest enemy country into threat_value (i think)
     # + strategic value for enemies +
 
+def closest_enemy(board, source, me):
+    queue = [] 
+    visited = []
+    queue.append(source + "-0")
+    while len(queue) > 0: 
+        item = queue.pop(0)
+        country = item.split("-")[0]
+        level = int(item.split("-")[1])
+        if board['countries'][country]['owner'] != me.name:
+            return level; 
+        else:
+            level += 1
+            for c2 in board['countries'][country]['bordering_countries']: 
+                if c2 not in visited:
+                    queue.append(c2 + "-" + str(level))
+                    visited.append(c2)
+    return 100 
 
 def set_strategic_value(board, country_name, me):
     num_bordering_countries = (
