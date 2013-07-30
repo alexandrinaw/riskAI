@@ -319,6 +319,10 @@ def spend_cards(board, me):
     trade_in = random.choice(potential_sets)
     trade_in = [c['country_name'] for c in trade_in]
     response = {'action':'spend_cards', 'data':trade_in}
+    if "pass" in me.available_actions:
+        for player in board['other_players']:
+            if board['other_players'][player]['cards']>=3:
+                response = {'action':'pass'}
     print "traded in cards %s" % trade_in
     return response
 
