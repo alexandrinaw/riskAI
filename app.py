@@ -66,7 +66,7 @@ def unpack_json(game_json):
 
         board['countries'][country_name]['threat_value'] = (
             set_threat_value(board, country_name, me))
-
+        
     return me, players, board
 
 def enemy_troops_per_turn(board, enemy):
@@ -112,8 +112,7 @@ def set_threat_value(board, country_name, me):
         board['countries'][country_name]['unique_bordering_enemies']) 
     
     return (bordering_enemies*2 + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth
-            + (5/(closest_enemy(board, country_name, me) + 1)))
+            unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth)
     # + strategic value for enemies +
 
 def closest_enemy(board, source, me):
@@ -132,7 +131,7 @@ def closest_enemy(board, source, me):
                 if c2 not in visited:
                     queue.append(c2 + "-" + str(level))
                     visited.append(c2)
-    return 100 
+    return 42 
 
 def set_strategic_value(board, country_name, me):
     num_bordering_countries = (
@@ -265,7 +264,6 @@ def reinforce(board, me):
     troops = 1 
     to_reinforce = None
     reinforce_from = None
-
     for c1 in me.my_countries:
         if not board['countries'][c1]['bordering_enemies']:
             if board['countries'][c1]['troops'] > troops:
@@ -273,7 +271,11 @@ def reinforce(board, me):
                 troops = board['countries'][c1]['troops']
     if reinforce_from is not None:
         for c2 in board['countries'][reinforce_from]['bordering_countries']:
-            if board['countries'][c2]['threat_value'] > threat_value:
+            if board['countries'][c2]['threat_value'] == 0:
+                modified_value = closest_enemy(board, c2, me) 
+            else: 
+                modified_value = board['countries'][c2]['threat_value']
+            if modified_value > threat_value:
                 to_reinforce = c2
                 threat_value = board['countries'][c2]['threat_value']       
     else:
@@ -292,8 +294,8 @@ def reinforce(board, me):
         
     if reinforce_from is not None: 
         moving_troops = board['countries'][reinforce_from]['troops']-1
-        print "reinforced %s from %s with %s troops" % (
-            to_reinforce, reinforce_from, moving_troops)
+        print "reinforced %s from %s with %s troops -- Threat_value =  %s" % (
+            to_reinforce, reinforce_from, moving_troops, threat_value)
         response = {'action':'reinforce', 'data':{
         'origin_country': reinforce_from, 
         'destination_country':to_reinforce,
