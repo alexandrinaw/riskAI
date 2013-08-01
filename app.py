@@ -321,14 +321,26 @@ def is_card_set(card_one, card_two, card_three):
 def spend_cards(board, me):
     combos = itertools.combinations(me.cards,3)
     potential_sets = [c for c in combos if is_card_set(c[0], c[1],c[2])]
-    trade_in = random.choice(potential_sets)
-    trade_in = [c['country_name'] for c in trade_in]
-    response = {'action':'spend_cards', 'data':trade_in}
     if "pass" in me.available_actions:
         for player in board['other_players']:
             if board['other_players'][player]['cards']>=3:
                 response = {'action':'pass'}
-    print "traded in cards %s" % trade_in
+    else:
+        trade_in = random.choice(potential_sets)
+        if len(potential_sets)>1:
+            owned_cards = [c for c in me.cards if c not in me.my_countries]
+            for set in potential_sets:
+                owned = 0
+                for c in set:
+                    for o in owned_cards:
+                        if c==o:
+                            owned+=1
+                if owned==1:
+                    trade_in=set
+                    break
+        trade_in = [c['country_name'] for c in trade_in]
+        response = {'action':'spend_cards', 'data':trade_in}         
+        print "traded in cards %s" % trade_in
     return response
 
 @app.route("/status")
