@@ -36,6 +36,7 @@ def unpack_json(game_json):
         board['countries'][country_name]['troops'] = (
                             game['countries'][country_name]['troops'])
 
+    for country_name in game['countries']:
         board['countries'][country_name]['bordering_enemies'] = list(
              game['countries'][bordering_country]['owner'] for 
              bordering_country in (
@@ -83,7 +84,6 @@ def enemy_troops_per_turn(board, enemy):
             continent_bonus+=1
     return max(math.ceil(countries_owned / 3), 3) + continent_bonus
         
-    
 def set_threat_value(board, country_name, me):
     enemy_troops_per_turn=sum(
         [board['other_players'][enemy]['troops_per_turn'] for enemy in 
@@ -110,11 +110,14 @@ def set_threat_value(board, country_name, me):
         'bordering_enemy_troops'] 
     unique_bordering_enemies = len(
         board['countries'][country_name]['unique_bordering_enemies']) 
+    distance = closest_enemy(board, country_name, me)
     
-    return (bordering_enemies * float(2) + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn / float(2) + 
-            enemy_card_worth)
+    threat =  (bordering_enemies*2 + bordering_enemy_troops - 
+            unique_bordering_enemies + enemy_troops_per_turn/2 + 
+	    enemy_card_worth + float(1)/float(1+distance))
     # + strategic value for enemies +
+    print "%s - %s" % (country_name, threat) 
+    return threat
 
 def closest_enemy(board, source, me):
     queue = [] 
@@ -278,12 +281,12 @@ def reinforce(board, me):
     if reinforce_from is not None:
         for c2 in board['countries'][reinforce_from]['bordering_countries']:
             if board['countries'][c2]['threat_value'] == 0:
-                modified_value = closest_enemy(board, c2, me) 
+                modified_value = 100/closest_enemy(board, c2, me) 
             else: 
                 modified_value = board['countries'][c2]['threat_value']
             if modified_value > threat_value:
                 to_reinforce = c2
-                threat_value = board['countries'][c2]['threat_value']       
+                threat_value = modified_value 
     else:
         threat_value = 0
         troops = 1 
