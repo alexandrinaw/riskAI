@@ -36,11 +36,14 @@ def unpack_json(game_json):
         countries = game['countries']
 
         country['owner'] = game_country['owner']
-        country['troops'] = (game_country['troops']
-        country['bordering_enemies'] = [countries[bordering_country]['owner'] for
-                                        bordering_country in country['bordering_countries']
-                                        if (countries[bordering_country]['owner'] != my_name and
-                                        countries[bordering_country]['owner'] != 'none')]
+        country['troops'] = game_country['troops']
+        country['bordering_enemies'] = [countries[bordering]['owner']
+                                        for bordering
+                                        in country['bordering_countries']
+                                        if countries[bordering]['owner']
+                                        != my_name and
+                                        countries[bordering]['owner']
+                                        != 'none']
 
         country['bordering_enemy_troops'] = 0
         for enemy_country in country[
