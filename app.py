@@ -152,7 +152,7 @@ def set_strategic_value(board, country_name, me):
     countries_in_continent = len(continent['countries'])
     our_countries_in_continent = len(list((c for c in continent['countries']
                                            if board['countries'][c]['owner']
-                                           == bme.name)))
+                                           == me.name)))
     value = (10/num_bordering_countries + 10/access_points + bonus/2 +
              (num_bordering_countries - num_bordering_enemies) +
              ((our_countries_in_continent) * 5 /
