@@ -216,7 +216,10 @@ def attack_determination(board, me):
                         and c2 not in me.my_countries]
     good_attacks=[]
     for attack_combo in possible_attacks:
-        if board['countries'][attack_combo[0]]['troops']>=2*board['countries'][attack_combo[1]]['troops']:
+        border_troops=0
+        for border in board['countries'][attack_combo[1]]['bordering_countries']:
+            border_troops+=board['countries'][border]['troops']
+        if border_troops>=2*board['countries'][attack_combo[1]]['troops']:
             good_attacks.append(attack_combo)
     if not possible_attacks or not good_attacks:
         response = {"action":"end_attack_phase"}
