@@ -112,7 +112,8 @@ def set_threat_value(board, country_name, me):
         board['countries'][country_name]['unique_bordering_enemies']) 
     
     return (bordering_enemies*2 + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn/2 + enemy_card_worth)
+            unique_bordering_enemies + enemy_troops_per_turn/2 + 
+            enemy_card_worth)
     # + strategic value for enemies +
 
 def closest_enemy(board, source, me):
@@ -239,9 +240,11 @@ def attack(board, possible_attacks):
         attacking_troops = min(3, board['countries'][attacking_country][
             'troops'] - 1)
         moving_troops = 0
-        troops_available = max(0, board['countries'][attacking_country]['troops'] - 4)
+        troops_available = max(
+                0, board['countries'][attacking_country]['troops'] - 4)
         threat = board['countries'][defending_country]['threat_value']
-        strategic_value = board['countries'][defending_country]['strategic_value']
+        strategic_value = board['countries'][defending_country][
+                                                    'strategic_value']
         while troops_available > 0:
             compared_value = 0
             if moving_troops >= threat + strategic_value:
