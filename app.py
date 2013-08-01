@@ -111,8 +111,8 @@ def set_threat_value(board, country_name, me):
     unique_bordering_enemies = len(
         board['countries'][country_name]['unique_bordering_enemies']) 
     
-    return (bordering_enemies*2 + bordering_enemy_troops - 
-            unique_bordering_enemies + enemy_troops_per_turn/2 + 
+    return (bordering_enemies * float(2) + bordering_enemy_troops - 
+            unique_bordering_enemies + enemy_troops_per_turn / float(2) + 
             enemy_card_worth)
     # + strategic value for enemies +
 
@@ -150,10 +150,9 @@ def set_strategic_value(board, country_name, me):
     our_countries_in_continent = len(list((c for c in board['continents'][board['countries'][country_name]['continent']][
             'countries'] if board['countries'][c]['owner'] == me.name)))
     return (
-        10/num_bordering_countries + 10/access_points + bonus/2 + 
-        (num_bordering_countries - num_bordering_enemies) + 
-        ((our_countries_in_continent) * 5 / 
-        countries_in_continent))
+        float(10)/num_bordering_countries + float(10)/access_points + 
+        bonus/float(2) + (num_bordering_countries - num_bordering_enemies) + 
+        ((our_countries_in_continent) * float(5) / countries_in_continent))
 
 def compare_modified_values(board, list_to_compare):
     compared_value = 0
@@ -217,7 +216,8 @@ def attack_determination(board, me):
     good_attacks=[]
     for attack_combo in possible_attacks:
         border_troops=0
-        for border in board['countries'][attack_combo[1]]['bordering_countries']:
+        for border in board['countries'][attack_combo[1]][
+                                                    'bordering_countries']:
             border_troops+=board['countries'][border]['troops']
         if border_troops>=2*board['countries'][attack_combo[1]]['troops']:
             good_attacks.append(attack_combo)
