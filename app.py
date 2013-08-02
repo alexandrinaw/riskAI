@@ -13,6 +13,7 @@ def unpack_json(game_json):
     board = eval(open('board_map.rsk').readline())
     my_data = game_json['you']
     game = game_json['game']
+    board['id'] = game['uid']
     my_name = my_data['name']
     print "You are %r" % my_name
     me = Player(my_name)
@@ -354,8 +355,13 @@ def status():
     print 'got status check'
     return ''
 
-@app.route("/not_turn")
+@app.route("/not_turn", methods = ['POST'])
 def not_turn():
+    r = json.loads(request.form['risk'])
+    me, players, board = unpack_json(r)
+    game_id = board['id']
+    f = open (game_id + '.txt', 'a')
+    f.write(json.dumps(r) + "\n")
     print 'got board'
     return ''
 
@@ -363,6 +369,9 @@ def not_turn():
 def turn():
     r = json.loads(request.form['risk'])
     me, players, board = unpack_json(r)
+    game_id = board['id']
+    f = open (game_id + '.txt', 'a')
+    f.write(json.dumps(r) + "\n")
     print me.available_actions
     if "choose_country" in me.available_actions:
         response = choose_country(board)
