@@ -251,8 +251,8 @@ def attack(board, possible_attacks):
         threat = board['countries'][defending_country]['threat_value']
         strategic_value = board['countries'][defending_country][
                                                     'strategic_value']
+        compared_value = 0
         while troops_available > 0:
-            compared_value = 0
             if moving_troops >= threat + strategic_value:
                 break
             modified_value = threat + strategic_value - moving_troops
@@ -361,7 +361,7 @@ def not_turn():
 
 @app.route('/turn', methods=['POST'])
 def turn():
-    r = json.loads(request.form['risk'])
+    r = json.loads(request.data)
     me, players, board = unpack_json(r)
     print me.available_actions
     if "choose_country" in me.available_actions:
