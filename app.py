@@ -251,8 +251,8 @@ def attack(board, possible_attacks):
         threat = board['countries'][defending_country]['threat_value']
         strategic_value = board['countries'][defending_country][
                                                     'strategic_value']
-        compared_value = 0
         while troops_available > 0:
+            compared_value = 0
             if moving_troops >= threat + strategic_value:
                 break
             modified_value = threat + strategic_value - moving_troops
