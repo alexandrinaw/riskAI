@@ -225,7 +225,8 @@ def attack_determination(board, me):
         border_troops=0
         for border in board['countries'][attack_combo[1]][
                                                     'bordering_countries']:
-            border_troops+=board['countries'][border]['troops']
+            if board['countries'][border] in me.my_countries:
+                border_troops+=board['countries'][border]['troops']
         if border_troops>=2*board['countries'][attack_combo[1]]['troops']:
             good_attacks.append(attack_combo)
     if not possible_attacks or not good_attacks:
