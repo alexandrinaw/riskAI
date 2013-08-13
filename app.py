@@ -178,6 +178,10 @@ def choose_country(board):
 
 def deploy_initial_troops(board, me):
     chosen_country = compare_modified_values(board, me.my_countries)
+    threat = 0
+    for c in me.my_countries:
+        if board['countires'][c]['threat_value']>threat:
+            chosen_country = c 
     deploy_orders = {chosen_country: 1}
     print "initial deploy orders: %s" % deploy_orders
     return {"action":"deploy_troops", "data":deploy_orders}
