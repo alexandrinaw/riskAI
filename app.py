@@ -366,7 +366,7 @@ def not_turn():
 
 @app.route('/turn', methods=['POST'])
 def turn():
-    r = json.loads(request.form['risk'])
+    r = json.loads(request.form['risk']) #doesn't work with current risk, just pushing for testing on Alex's version
     me, players, board = unpack_json(r)
     print me.available_actions
     if "choose_country" in me.available_actions:
