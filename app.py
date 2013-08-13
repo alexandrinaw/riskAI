@@ -114,7 +114,7 @@ def set_threat_value(board, country_name, me):
     
     threat =  (bordering_enemies*2 + bordering_enemy_troops - 
             unique_bordering_enemies + enemy_troops_per_turn/2 + 
-	    enemy_card_worth + float(1)/float(1+distance)+1/closest_enemy(board, country_name, me))
+	    enemy_card_worth + float(1)/float(1+distance))
     # + strategic value for enemies +
     print "%s - %s" % (country_name, threat) 
     return threat
@@ -366,7 +366,7 @@ def not_turn():
 
 @app.route('/turn', methods=['POST'])
 def turn():
-    r = json.loads(request.data)
+    r = json.loads(request.form['risk'])
     me, players, board = unpack_json(r)
     print me.available_actions
     if "choose_country" in me.available_actions:
