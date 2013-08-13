@@ -180,7 +180,7 @@ def deploy_initial_troops(board, me):
     chosen_country = compare_modified_values(board, me.my_countries)
     threat = 0
     for c in me.my_countries:
-        if board['countires'][c]['threat_value']>threat:
+        if board['countries'][c]['threat_value']>threat:
             chosen_country = c 
     deploy_orders = {chosen_country: 1}
     print "initial deploy orders: %s" % deploy_orders
@@ -225,7 +225,7 @@ def attack_determination(board, me):
         border_troops=0
         for border in board['countries'][attack_combo[1]][
                                                     'bordering_countries']:
-            if board['countries'][border] in me.my_countries:
+            if border in me.my_countries:
                 border_troops+=board['countries'][border]['troops']
         if border_troops>=2*board['countries'][attack_combo[1]]['troops']:
             good_attacks.append(attack_combo)
